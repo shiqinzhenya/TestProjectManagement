@@ -8,9 +8,10 @@ app = Flask(__name__)
 CORS(app_user, supports_credentials=True)
 CORS(app_product, supports_credentials=True)
 
-#注册蓝图
+#注册蓝图 参数 url_prefix="/api/product" 定义统一URL前缀，那么在 route 路径定义都可以去掉相同的前缀路径/api/product
 app.register_blueprint(app_user)
 app.register_blueprint(app_product)
 
 if __name__ == '__main__':
+    # debug=True：调试模式，每次有代码修改保存时程序会自动重新热加载，不需要每次重新手动启动
     app.run(debug=True)
