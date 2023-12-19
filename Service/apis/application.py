@@ -81,3 +81,58 @@ def searchBykey():
         response['total'] = total[0]['count']
         response['data'] = data
     return response
+
+@app_application.route("/api/application/update", methods=["POST"])
+def appUpdate():
+    connection = pool.connection()
+
+    body = request.get_data()
+    body = json.loads(body)
+    print(body)
+    resp_success = format.resp_format_success
+    resp_failed = format.resp_format_failed
+
+    # 后端检验必填数据是否为空
+    if 'appId' not in body or body['appId'] == '':
+        resp_failed['message'] = '应用不能为空'
+        return resp_failed
+    if 'developer' not in body or body['developer'] == '':
+        resp_failed['message']  = '研发负责人不能为空'
+        return resp_failed
+    if 'producer' not in body or body['producer'] == '':
+        resp_failed['message']  = '产品负责人不能为空'
+        return resp_failed
+    if 'tester' not in body or body['tester'] == '':
+        resp_failed['message']  = '测试负责人不能为空'
+        return resp_failed
+    
+    with connection:
+        # 若有ID 则是update
+        if 'id' in body and body['id'] != '':
+            with connection.cursor() as cursor:
+                update = "UPDATE `apps` SET `productId`=%s, `note`=%s,`tester`=%s,`developer`=%s,`producer`=%s,`cCEmail`=%s, `gitCode`=%s, `wiki`=%s, `more`=%s, `creteUser`=%s, `updateUser`=%s, `updateDate`= NOW() WHERE id=%s"
+                cursor.execute(update, (body["productId"], body["note"], body["tester"], body["developer"], body['producer'], body["cCEmail"],
+                                     body["gitCode"], body["wiki"], body["more"], body["creteUser"], body["updateUser"], body["id"]))
+                connection.commit()
+                return resp_success
+
+        # 若没有ID，则是新增applicatio
+        else:
+            # 首先先判断 appID 是否重复
+            with connection.cursor() as cursor:
+                sql = "SELECT * FROM `apps` WHERE `appId`=%s"
+                cursor.execute(sql, body['appId'])
+                result = cursor.fetchall()
+            if result:
+                resp_failed['message']  = '唯一编码 appID 已存在'
+                return resp_failed
+
+            with connection.cursor() as cursor:
+                insert = "INSERT INTO `apps` (`appId`,`productId`,`note`,`tester`,`developer`,`producer`,`cCEmail`,`gitCode`, `wiki`,`more`,`creteUser`,`updateUser`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                cursor.execute(insert, (body["appId"],body["productId"], body["note"], body["tester"], body["developer"], body['producer'], body["cCEmail"],
+                                     body["gitCode"], body["wiki"], body["more"], body["createUser"], body["updateUser"]))
+                connection.commit()
+            return resp_success
+
+
+

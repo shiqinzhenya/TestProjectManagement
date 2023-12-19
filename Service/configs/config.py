@@ -6,3 +6,8 @@ MYSQL_PORT = 3306
 MYSQL_DATABASE = 'TPMDatas'
 MYSQL_USER = 'root'
 MYSQL_PASSWORD = 'root'
+
+MAIL_HOST = 'smtp.qq.com'
+MAIL_PORT = 25
+MAIL_USER = '1336732398@qq.com'
+MAIL_PASSWORD = 'tyvpmcekqcjcjdgh'
